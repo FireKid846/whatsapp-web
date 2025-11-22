@@ -1,0 +1,20 @@
+{
+  "name": "whatsapp-session-monitor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Background service to monitor WhatsApp pairing sessions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "@supabase/supabase-js": "^2.39.0",
+    "@octokit/rest": "^21.0.2",
+    "pino": "^9.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
