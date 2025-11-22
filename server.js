@@ -20,6 +20,7 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO_URL = process.env.GITHUB_REPO_URL;
 const PORT = process.env.PORT || 3000;
+const RENDER_EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL; // Your Render service URL
 
 // Initialize Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -31,6 +32,29 @@ const processingQueue = new Set();
 console.log('🚀 Starting WhatsApp Session Monitor...');
 console.log(`📊 Supabase: ${SUPABASE_URL ? 'Connected' : 'NOT SET'}`);
 console.log(`📦 GitHub: ${GITHUB_REPO_URL || 'NOT SET'}`);
+console.log(`🔗 Self-ping URL: ${RENDER_EXTERNAL_URL || 'NOT SET'}`);
+
+// Self-ping function to keep Render awake
+function selfPing() {
+  if (!RENDER_EXTERNAL_URL) {
+    console.log('⚠️  RENDER_EXTERNAL_URL not set, skipping self-ping');
+    return;
+  }
+
+  setInterval(() => {
+    const url = RENDER_EXTERNAL_URL.endsWith('/') 
+      ? `${RENDER_EXTERNAL_URL}health` 
+      : `${RENDER_EXTERNAL_URL}/health`;
+    
+    http.get(url, (res) => {
+      console.log(`🏓 Self-ping: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('Self-ping error:', err.message);
+    });
+  }, 10 * 60 * 1000); // Every 10 minutes
+
+  console.log('✅ Self-ping enabled (every 10 minutes)');
+}
 
 // GitHub upload function
 async function uploadToGitHub(sessionId, phoneNumber, sessionPath) {
@@ -359,6 +383,9 @@ setInterval(pollWaitingSessions, 10000);
 
 // Cleanup every 3 minutes
 setInterval(cleanupStaleSessions, 3 * 60 * 1000);
+
+// Start self-ping
+selfPing();
 
 // Status update every minute
 setInterval(() => {
